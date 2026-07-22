@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Management System</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #121826;
+      color: #f0f5ff;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #161e32;
+      border: 1px solid #374664;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    /* Header */
+    .header {
+      background: #161e32;
+      border-bottom: 2px solid #374664;
+      padding: 20px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-title h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #ffffff;
+    }
+    .stats-container {
+      display: flex;
+      gap: 12px;
+    }
+    .stat-card {
+      background: #121826;
+      border: 1px solid #3b82f6;
+      border-radius: 6px;
+      padding: 8px 18px;
+      min-width: 140px;
+      text-align: center;
+    }
+    .stat-card.green { border-color: #22c55e; }
+    .stat-card.purple { border-color: #a855f7; }
+    .stat-title {
+      font-size: 11px;
+      color: #8ca0c8;
+      margin-bottom: 3px;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+    .stat-card.green .stat-value { color: #22c55e; }
+    .stat-card.purple .stat-value { color: #a855f7; }
+
+    /* Main Area */
+    .main-body {
+      padding: 20px 25px;
+    }
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .search-row label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #8ca0c8;
+    }
+    .search-input {
+      background: #1e293f;
+      border: 1px solid #374664;
+      border-radius: 4px;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      width: 280px;
+    }
+    .btn-clear {
+      background: #1e293f;
+      color: #8ca0c8;
+      border: 1px solid #374664;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .btn-clear:hover { background: #283754; color: #fff; }
+
+    /* Table */
+    .table-container {
+      border: 1px solid #374664;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1c263c;
+    }
+    th {
+      background: #28375a;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 2px solid #3b82f6;
+    }
+    td {
+      padding: 12px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid #2d3c5a;
+    }
+    tr:nth-child(even) {
+      background-color: #232f49;
+    }
+    tr:hover {
+      background-color: #3b64c8;
+      cursor: pointer;
+    }
+    tr.selected {
+      background-color: #3b64c8 !important;
+    }
+    .cgpa-green { color: #22c55e; font-weight: 600; }
+    .cgpa-orange { color: #f97316; font-weight: 600; }
+    .cgpa-red { color: #ef4444; font-weight: 600; }
+    .id-blue { color: #3b82f6; font-weight: 600; }
+
+    /* Footer Controls */
+    .footer-bar {
+      background: #161e32;
+      border-top: 2px solid #374664;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: white;
+      transition: background 0.2s;
+    }
+    .btn-add { background: #3b82f6; }
+    .btn-add:hover { background: #2563eb; }
+    .btn-update { background: #f97316; }
+    .btn-update:hover { background: #ea580c; }
+    .btn-delete { background: #ef4444; }
+    .btn-delete:hover { background: #dc2626; }
+    .btn-view { background: #22c55e; }
+    .btn-view:hover { background: #16a34a; }
+    .btn-refresh { background: #1e293f; color: #8ca0c8; }
+    .btn-refresh:hover { background: #283754; color: #fff; }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .modal-content {
+      background: #1e293f;
+      border: 1px solid #374664;
+      border-radius: 8px;
+      width: 480px;
+      padding: 25px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    .form-group {
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-group label {
+      font-size: 13px;
+      color: #8ca0c8;
+      font-weight: 600;
+    }
+    .form-group input, .form-group select {
+      width: 260px;
+      background: #121826;
+      border: 1px solid #374664;
+      border-radius: 4px;
+      color: #fff;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">
+        <span style="font-size: 28px;">🎓</span>
+        <h1>STUDENT MANAGEMENT SYSTEM</h1>
+      </div>
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-title">Total Students</div>
+          <div class="stat-value" id="stat-total">6</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-title">Toppers (CGPA ≥ 9)</div>
+          <div class="stat-value" id="stat-toppers">4</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-title">Departments</div>
+          <div class="stat-value" id="stat-depts">4</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="main-body">
+      <div class="search-row">
+        <label>🔍 Search:</label>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by name, dept or ID..." onkeyup="filterStudents()">
+        <button class="btn-clear" onclick="clearSearch()">✖ Clear</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Department</th>
+              <th>Year</th>
+              <th>CGPA</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <!-- Rows injected by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer Controls -->
+    <div class="footer-bar">
+      <button class="btn btn-add" onclick="openAddModal()">➕ Add Student</button>
+      <button class="btn btn-update" onclick="openUpdateModal()">✏ Update Student</button>
+      <button class="btn btn-delete" onclick="deleteStudent()">🗑 Delete Student</button>
+      <button class="btn btn-view" onclick="viewDetails()">👁 View Details</button>
+      <button class="btn btn-refresh" onclick="renderTable()">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal" id="studentModal">
+    <div class="modal-content">
+      <div class="modal-header" id="modalTitle">➕ Add New Student</div>
+      <form id="studentForm">
+        <div class="form-group">
+          <label>Student ID *</label>
+          <input type="number" id="mId" required>
+        </div>
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="mName" required>
+        </div>
+        <div class="form-group">
+          <label>Age *</label>
+          <input type="number" id="mAge" required>
+        </div>
+        <div class="form-group">
+          <label>Gender *</label>
+          <select id="mGender" required>
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Department *</label>
+          <select id="mDept" required>
+            <option value="">Select Department</option>
+            <option value="AI & ML">AI & ML</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Data Science">Data Science</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Mechanical">Mechanical</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year of Study *</label>
+          <select id="mYear" required>
+            <option value="">Select Year</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>CGPA (0 - 10) *</label>
+          <input type="number" step="0.01" id="mCgpa" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-refresh" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-add" id="modalSubmitBtn">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let students = [
+      { id: 101, name: "Rahul Kumar", age: 20, gender: "Male", department: "AI & ML", year: 3, cgpa: 9.25 },
+      { id: 102, name: "Sneha Reddy", age: 21, gender: "Female", department: "Computer Science", year: 4, cgpa: 9.50 },
+      { id: 103, name: "Arjun Mehta", age: 19, gender: "Male", department: "Data Science", year: 2, cgpa: 8.75 },
+      { id: 104, name: "Priya Sharma", age: 22, gender: "Female", department: "AI & ML", year: 4, cgpa: 9.80 },
+      { id: 105, name: "Vikram Singh", age: 20, gender: "Male", department: "Electronics", year: 3, cgpa: 7.90 },
+      { id: 106, name: "Ananya Das", age: 21, gender: "Female", department: "Computer Science", year: 3, cgpa: 9.10 }
+    ];
+
+    let selectedRowId = null;
+    let isEditMode = false;
+
+    function renderTable(data = students) {
+      const tbody = document.getElementById("studentTableBody");
+      tbody.innerHTML = "";
+
+      data.forEach(s => {
+        const tr = document.createElement("tr");
+        if (s.id === selectedRowId) tr.classList.add("selected");
+        
+        let cgpaClass = s.cgpa >= 9.0 ? "cgpa-green" : s.cgpa >= 7.5 ? "cgpa-orange" : "cgpa-red";
+        let yearText = s.year + (s.year===1?"st":s.year===2?"nd":s.year===3?"rd":"th") + " Year";
+
+        tr.innerHTML = `
+          <td class="id-blue">${s.id}</td>
+          <td style="font-weight:600;">${s.name}</td>
+          <td>${s.age}</td>
+          <td>${s.gender}</td>
+          <td>${s.department}</td>
+          <td>${yearText}</td>
+          <td class="${cgpaClass}">${s.cgpa.toFixed(2)}</td>
+        `;
+
+        tr.onclick = () => {
+          selectedRowId = s.id;
+          renderTable(data);
+        };
+
+        tbody.appendChild(tr);
+      });
+
+      updateStats();
+    }
+
+    function updateStats() {
+      document.getElementById("stat-total").innerText = students.length;
+      document.getElementById("stat-toppers").innerText = students.filter(s => s.cgpa >= 9.0).length;
+      const depts = new Set(students.map(s => s.department));
+      document.getElementById("stat-depts").innerText = depts.size;
+    }
+
+    function filterStudents() {
+      const q = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = students.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.department.toLowerCase().includes(q) ||
+        s.id.toString().includes(q)
+      );
+      renderTable(filtered);
+    }
+
+    function clearSearch() {
+      document.getElementById("searchInput").value = "";
+      renderTable();
+    }
+
+    function openAddModal() {
+      isEditMode = false;
+      document.getElementById("modalTitle").innerText = "➕ Add New Student";
+      document.getElementById("mId").disabled = false;
+      document.getElementById("studentForm").reset();
+      document.getElementById("studentModal").style.display = "flex";
+    }
+
+    function openUpdateModal() {
+      if (!selectedRowId) {
+        alert("Please select a student row from the table first.");
+        return;
+      }
+      const s = students.find(item => item.id === selectedRowId);
+      if (!s) return;
+
+      isEditMode = true;
+      document.getElementById("modalTitle").innerText = "✏ Update Student — ID: " + s.id;
+      document.getElementById("mId").value = s.id;
+      document.getElementById("mId").disabled = true;
+      document.getElementById("mName").value = s.name;
+      document.getElementById("mAge").value = s.age;
+      document.getElementById("mGender").value = s.gender;
+      document.getElementById("mDept").value = s.department;
+      document.getElementById("mYear").value = s.year;
+      document.getElementById("mCgpa").value = s.cgpa;
+
+      document.getElementById("studentModal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("studentModal").style.display = "none";
+    }
+
+    document.getElementById("studentForm").onsubmit = function(e) {
+      e.preventDefault();
+      const id = parseInt(document.getElementById("mId").value);
+      const name = document.getElementById("mName").value.trim();
+      const age = parseInt(document.getElementById("mAge").value);
+      const gender = document.getElementById("mGender").value;
+      const dept = document.getElementById("mDept").value;
+      const year = parseInt(document.getElementById("mYear").value);
+      const cgpa = parseFloat(document.getElementById("mCgpa").value);
+
+      if (isEditMode) {
+        const index = students.findIndex(s => s.id === id);
+        if (index !== -1) {
+          students[index] = { id, name, age, gender, department: dept, year, cgpa };
+        }
+      } else {
+        if (students.some(s => s.id === id)) {
+          alert("Student ID " + id + " already exists!");
+          return;
+        }
+        students.push({ id, name, age, gender, department: dept, year, cgpa });
+      }
+
+      closeModal();
+      renderTable();
+    };
+
+    function deleteStudent() {
+      if (!selectedRowId) {
+        alert("Please select a student row from the table first.");
+        return;
+      }
+      const s = students.find(item => item.id === selectedRowId);
+      if (confirm(`Are you sure you want to delete ${s.name} (ID: ${s.id})?`)) {
+        students = students.filter(item => item.id !== selectedRowId);
+        selectedRowId = null;
+        renderTable();
+      }
+    }
+
+    function viewDetails() {
+      if (!selectedRowId) {
+        alert("Please select a student row from the table first.");
+        return;
+      }
+      const s = students.find(item => item.id === selectedRowId);
+      alert(`STUDENT DETAILS:\n\nID: ${s.id}\nName: ${s.name}\nAge: ${s.age}\nGender: ${s.gender}\nDepartment: ${s.department}\nYear: ${s.year}th Year\nCGPA: ${s.cgpa}`);
+    }
+
+    // Initial render
+    renderTable();
+  </script>
+</body>
+</html>
